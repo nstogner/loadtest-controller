@@ -16,3 +16,9 @@ Create a local cluster.
 ```sh
 kind create cluster --name loadtesting
 ```
+
+Check that cluster is working.
+
+```sh
+kubectl cluster-info
+```
