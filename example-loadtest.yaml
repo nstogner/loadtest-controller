@@ -1,0 +1,11 @@
+apiVersion: tests.tbd.com/v1
+kind: LoadTest
+metadata:
+  name: example-localhost-8080
+  namespace: default
+spec:
+  method: GET
+  address: http://localhost:8080
+  duration: 100ms
+#status:
+#  requests: 5
