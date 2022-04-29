@@ -1,0 +1,20 @@
+# permissions for end users to view loadtests.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: loadtest-viewer-role
+rules:
+- apiGroups:
+  - tests.tbd.com
+  resources:
+  - loadtests
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - tests.tbd.com
+  resources:
+  - loadtests/status
+  verbs:
+  - get

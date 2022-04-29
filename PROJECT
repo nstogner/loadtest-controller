@@ -1,0 +1,16 @@
+domain: tbd.com
+layout:
+- go.kubebuilder.io/v3
+projectName: loadtest-controller
+repo: github.com/nstogner/loadtest-controller
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: tbd.com
+  group: tests
+  kind: LoadTest
+  path: github.com/nstogner/loadtest-controller/api/v1
+  version: v1
+version: "3"
