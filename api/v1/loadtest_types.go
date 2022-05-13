@@ -37,8 +37,9 @@ type LoadTestSpec struct {
 // LoadTestStatus defines the observed state of LoadTest
 type LoadTestStatus struct {
 	// Requests is the number of requests that the load test ran.
-	Requests  int  `json:"requests,omitempty"`
-	Completed bool `json:"completed,omitempty"`
+	RequestCount   int64           `json:"requestCount,omitempty"`
+	AverageLatency metav1.Duration `json:"averageLatency,omitempty"`
+	Completed      bool            `json:"completed,omitempty"`
 }
 
 //+kubebuilder:object:root=true

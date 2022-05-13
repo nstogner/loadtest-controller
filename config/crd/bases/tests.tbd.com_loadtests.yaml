@@ -47,11 +47,14 @@ spec:
           status:
             description: LoadTestStatus defines the observed state of LoadTest
             properties:
+              averageLatency:
+                type: string
               completed:
                 type: boolean
-              requests:
+              requestCount:
                 description: Requests is the number of requests that the load test
                   ran.
+                format: int64
                 type: integer
             type: object
         type: object

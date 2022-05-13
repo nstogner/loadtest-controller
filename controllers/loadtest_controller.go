@@ -23,15 +23,20 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	testsv1 "github.com/nstogner/loadtest-controller/api/v1"
+	"github.com/nstogner/loadtest-controller/runner"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // LoadTestReconciler reconciles a LoadTest object
 type LoadTestReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
+
+	Concurrency int
 }
 
 //+kubebuilder:rbac:groups=tests.tbd.com,resources=loadtests,verbs=get;list;watch;create;update;patch;delete
@@ -64,9 +69,19 @@ func (r *LoadTestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	lg.Info("Running load test", "duration", lt.Spec.Duration)
 
-	// TODO(nstogner): Call vegeta libraries.
+	out := runner.Run(ctx, runner.Input{
+		Method:    lt.Spec.Method,
+		URL:       lt.Spec.Address,
+		Duration:  lt.Spec.Duration.Duration,
+		ReqPerSec: 60,
+	})
+
+	lg.Info("Done running load test", "duration", lt.Spec.Duration)
 
 	lt.Status.Completed = true
+	lt.Status.RequestCount = out.RequestCount
+	lt.Status.AverageLatency = metav1.Duration{Duration: out.AverageLatency()}
+
 	if err := r.Status().Update(ctx, &lt); err != nil {
 		return ctrl.Result{}, fmt.Errorf("updating LoadTest: %w", err)
 	}
@@ -78,5 +93,8 @@ func (r *LoadTestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 func (r *LoadTestReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&testsv1.LoadTest{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: r.Concurrency,
+		}).
 		Complete(r)
 }
