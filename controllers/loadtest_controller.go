@@ -75,10 +75,11 @@ func (r *LoadTestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	lg := log.FromContext(ctx)
 
 	lg.Info("Reconciling LoadTest")
+	defer lg.Info("Done reconciling LoadTest")
 
 	var lt testsv1.LoadTest
 	if err := r.Get(ctx, req.NamespacedName, &lt); err != nil {
-		return ctrl.Result{}, fmt.Errorf("getting LoadTest: %w", err)
+		return ctrl.Result{}, client.IgnoreNotFound(fmt.Errorf("getting LoadTest: %w", err))
 	}
 
 	if lt.Status.Completed {
