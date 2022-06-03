@@ -20,16 +20,33 @@ import (
 	"context"
 	"fmt"
 
+	testsv1 "github.com/nstogner/loadtest-controller/api/v1"
+	"github.com/nstogner/loadtest-controller/runner"
+	"github.com/prometheus/client_golang/prometheus"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	testsv1 "github.com/nstogner/loadtest-controller/api/v1"
-	"github.com/nstogner/loadtest-controller/runner"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
+
+var (
+	metricRunsTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "loadtest_runs_total",
+			Help: "Number of load tests ran",
+		},
+	)
+)
+
+func init() {
+	// Register custom metrics with the global prometheus registry
+	metrics.Registry.MustRegister(metricRunsTotal)
+}
 
 // LoadTestReconciler reconciles a LoadTest object
 type LoadTestReconciler struct {
@@ -37,6 +54,8 @@ type LoadTestReconciler struct {
 	Scheme *runtime.Scheme
 
 	Concurrency int
+
+	record.EventRecorder
 }
 
 //+kubebuilder:rbac:groups=tests.tbd.com,resources=loadtests,verbs=get;list;watch;create;update;patch;delete
@@ -68,6 +87,8 @@ func (r *LoadTestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	lg.Info("Running load test", "duration", lt.Spec.Duration)
+	r.Eventf(&lt, corev1.EventTypeNormal, "LoadTestStarted", "Running load test for %s", lt.Spec.Duration.Duration.String())
+	metricRunsTotal.Inc()
 
 	out := runner.Run(ctx, runner.Input{
 		Method:    lt.Spec.Method,
