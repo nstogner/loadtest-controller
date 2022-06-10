@@ -20,6 +20,9 @@ type Output struct {
 }
 
 func (o Output) AverageLatency() time.Duration {
+	if o.RequestCount == 0 {
+		return 0
+	}
 	return o.totalLatency / time.Duration(o.RequestCount)
 }
 
