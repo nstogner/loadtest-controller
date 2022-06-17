@@ -1,0 +1,8 @@
+apiVersion: tests.tbd.com/v1
+kind: LoadTest
+metadata:
+  name: myapp
+spec:
+  method: GET
+  address: http://myapp.default.svc.cluster.local
+  duration: 10s

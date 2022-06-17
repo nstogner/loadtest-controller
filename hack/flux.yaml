@@ -1,0 +1,23 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: loadtest-controller
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: https://github.com/nstogner/loadtest-controller
+  ref:
+    branch: main
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: loadtest-controller
+  namespace: flux-system
+spec:
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: loadtest-controller
+  path: "./config/default"
+  prune: true
