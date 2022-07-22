@@ -29,8 +29,14 @@ type LoadTestSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of LoadTest. Edit loadtest_types.go to remove/update
-	Method   string          `json:"method,omitempty"`
-	Address  string          `json:"address,omitempty"`
+
+	// +kubebuilder:validation:Enum:={GET,POST,DELETE}
+	// +kubebuilder:default:="GET"
+	Method string `json:"method,omitempty"`
+	// +kubebuilder:validation:Pattern:=`^(http|https)://(\S+)`
+	Address string `json:"address"`
+
+	// +kubebuilder:default:="3m"
 	Duration metav1.Duration `json:"duration,omitempty"`
 }
 

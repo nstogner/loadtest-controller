@@ -36,13 +36,20 @@ spec:
             description: LoadTestSpec defines the desired state of LoadTest
             properties:
               address:
+                pattern: ^(http|https)://(\S+)
                 type: string
               duration:
+                default: 3m
                 type: string
               method:
-                description: Foo is an example field of LoadTest. Edit loadtest_types.go
-                  to remove/update
+                default: GET
+                enum:
+                - GET
+                - POST
+                - DELETE
                 type: string
+            required:
+            - address
             type: object
           status:
             description: LoadTestStatus defines the observed state of LoadTest
